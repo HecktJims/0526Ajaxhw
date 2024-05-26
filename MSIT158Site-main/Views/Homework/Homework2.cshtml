@@ -1,0 +1,62 @@
+﻿@{
+    ViewData["Title"] = "Homework2";
+}
+
+<h1>Homework2</h1>
+
+<div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
+        <h2>註冊</h2>
+        <br />
+        <form>
+            <div class="mb-3">
+                <label for="InputName" class="form-label">姓名</label>
+                <input type="text" class="form-control" id="InputName" autocomplete="off">
+                <div id="txtname" class="alert alert-warning mt-3"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="InputEmail" class="form-label">電子郵件</label>
+                <input type="email" class="form-control" id="InputEmail" autocomplete="off">
+            </div>
+
+            <div class="mb-3">
+                <label for="InputAge" class="form-label">年紀</label>
+                <input type="number" class="form-control" id="InputAge" autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn btn-primary">送出</button>
+        </form>
+    </div>
+    <div class="col-2"></div>
+</div>
+
+@section Styles{
+    <style>
+    </style>
+}
+
+@section Scripts{
+    
+    <script>
+        const d1 = document.querySelector("#InputName");
+        const d2 = document.querySelector("#txtname");
+        var text = null;
+        d1.addEventListener("blur", async () => {
+            await fetch(`@Url.Content("~/api/CheckAccount")?name=${d1.value}`)
+                .then((resp) => {
+                    return resp.text()
+                })
+                .then((resp) => {
+                    text = resp
+                })
+            if (text === "1")
+                d2.textContent = "帳號已存在";
+            else if (text === "0")
+                d2.textContent = "帳號可使用!";
+            else
+                d2.textContent = "錯誤!!";
+        });
+    </script>
+}

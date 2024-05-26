@@ -1,0 +1,129 @@
+﻿@{
+    ViewData["Title"] = "Homework3";
+}
+
+<h1>Homework3</h1>
+
+<div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
+        <h2>註冊</h2>
+        <br />
+        <form method="post" enctype="multipart/form-data" id="form1">
+            <div class="mb-3">
+                <label for="InputName" class="form-label">姓名：</label>
+                <input type="text" class="form-control" id="InputName" autocomplete="off" name="name">
+                <div id="txtname" class="alert alert-warning mt-3"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="InputEmail" class="form-label">電子郵件：</label>
+                <input type="email" class="form-control" id="InputEmail" autocomplete="off" name="email">
+            </div>
+
+            <div class="mb-3">
+                <label for="Inputpw" class="form-label">密碼：</label>
+                <input type="password" class="form-control" id="Inputpw" autocomplete="off" name="psw">
+            </div>
+
+            <div class="mb-3">
+                <label for="checkpw" class="form-label">密碼再次確認：</label>
+                <input type="text" class="form-control" id="checkpw" autocomplete="off">
+                <div id="txtpw" class="alert alert-warning mt-3"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="InputAge" class="form-label">年紀：</label>
+                <input type="number" class="form-control" id="InputAge" autocomplete="off" name="age">
+            </div>
+
+            <div class="mb-3">
+                <label for="fromFile" class="form-label">頭像：</label>
+                <input type="file" class="form-control" id="fromFile" name="avatar">
+            </div>
+
+            <div class="mb-3">
+                <img id="img" width="240px" height="200px"/>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn1">送出</button>
+        </form>
+        <div id="txtcheck" class="alert alert-warning mt-3"></div>
+    </div>
+    <div class="col-2"></div>
+</div>
+
+@section Styles{
+    <style>
+    </style>
+}
+
+@section Scripts{
+
+    <script>
+
+        const d1 = document.querySelector("#InputName");
+        const d2 = document.querySelector("#txtname");
+        const d3 = document.querySelector("#Inputpw");
+        const d4 = document.querySelector("#checkpw");
+        const d5 = document.querySelector("#txtpw");
+        const d6 = document.querySelector("#btn1");
+        const d7 = document.querySelector("#txtcheck");
+        const d8 = document.querySelector("#fromFile");
+        const img = document.querySelector("#img");
+        var text = null;
+
+        d1.addEventListener("blur", async () => {
+            await fetch(`@Url.Content("~/api/CheckAccount")?name=${d1.value}`)
+                .then((resp) => {
+                    return resp.text()
+                })
+                .then((resp) => {
+                    text = resp
+                })
+            if (text === "1")
+                d2.textContent = "帳號已存在";
+            else if (text === "0")
+                d2.textContent = "帳號可使用!";
+            else
+                d2.textContent = "錯誤!!";
+        });
+
+        d4.addEventListener("blur", () => {
+            if (d4.value === d3.value) {
+                d5.textContent = "密碼正確";
+            }
+            else {
+                d5.textContent = "密碼錯誤!";
+            }
+        });
+
+        d6.addEventListener("click", async (evt) => {
+            evt.preventDefault();
+            const form = document.querySelector("#form1");
+            const data = new FormData(form);
+            const response = await fetch(`@Url.Content("~/api/register")`, {
+                method: "POST",
+                body: data,
+            })
+            text = await response.text();
+            d7.textContent = text;
+            
+            var namep = imgname() + d1.value;
+            img.src = `../images/${namep}.jpg`;
+        });
+
+        function imgname () {
+            var date = new Date();
+            var a = date.getMonth() + 1;
+            if (a < 10)
+                a = "0" + a.toString();
+            else
+                a = a.toString();
+            var b = date.getDate().toString();
+            
+            return `${a + b}`;
+        }
+
+    </script>
+}

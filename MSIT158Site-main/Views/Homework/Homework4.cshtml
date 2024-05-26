@@ -1,0 +1,188 @@
+﻿@{
+    ViewData["Title"] = "Homework4";
+}
+
+<h1>Homework4</h1>
+
+<div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
+        <div>
+            <ul id="ul1"></ul>
+            <div id="div1">
+                <select class="form-select form-select-sm" aria-label="Small select example">
+                    <option value="15">每頁顯示15筆資料</option>
+                    <option value="30">每頁顯示30筆資料</option>
+                    <option value="50">每頁顯示50筆資料</option>
+                    <option value="100">每頁顯示100筆資料</option>
+                </select>
+            </div>
+            <div id="div2">
+                <select class="form-select form-select-sm" aria-label="Small select example">
+                    <option value="asc">順序排列</option>
+                    <option value="desc">倒序排列</option>
+                </select>
+            </div>
+
+            <nav class="navbar bg-body-tertiary">
+                <div class="container-fluid">
+                    <form class="d-flex" role="search">
+                        <input class="form-control me-2" type="search" placeholder="搜尋..." aria-label="Search" id="s1">
+                        <button class="btn btn-outline-primary" type="submit" id="btn">Search</button>
+                    </form>
+                </div>
+            </nav>
+        </div>
+        <div id="div3"></div>
+        <div>
+            <ul id="ul2"></ul>
+        </div>
+    </div>
+    <div class="col-2"></div>
+</div>
+
+@section Styles {
+    <style>
+    </style>
+}
+
+@section Scripts {
+    <script>
+
+        const topul = document.querySelector("#ul1");
+        const bodydiv = document.querySelector("#div3");
+        const pageul = document.querySelector("#ul2");
+        const search = document.querySelector("#s1");
+        const btn = document.querySelector("#s1");
+        const opts = document.querySelectorAll("div.div1 > option");
+        const opts2 = document.querySelectorAll("div.div2 > option");
+
+        var ctid = 0;
+        var kwd = "";
+        var pg = 1;
+        var pgz = 15;
+        var sort = "";
+        var stype = "asc";
+
+        var searchData = {
+            "categoryId": 0,
+            "keyword": "",
+            "page": 1,
+            "pageSize": 15,
+            "sortBy": "",
+            "sortType": "asc"
+        };
+
+        const loadinit = () => {
+            searchData.categoryId = ctid;
+            searchData.keyword = kwd;
+            searchData.page = pg;
+            searchData.pageSize = pgz;
+            searchData.sortBy = sort;
+            searchData.sortType = stype;
+        }
+
+        for (var i = 0; i < opts.length; i++) {
+            opts[i].addEventListener("select", () => {
+                pgz = opts[i].value;
+                reload();
+            });
+        }
+
+        for (var i = 0; i < opts2.length; i++) {
+            opts2[i].addEventListener("select", () => {
+                stype = opts2[i].value;
+                reload();
+            });
+        }
+
+        const loadc = (async () => {
+            const response = await fetch(`@Url.Content("~/api/hw2")`);
+            const datas = await response.json();
+
+            const addc = await datas.map(x => {
+                const id = x.categoryId ? x.categoryId : 0;
+                const cname = x.CategoryName ? x.CategoryName : "";
+
+                return `<li class="page-item" id="cli" value="${id}">${cname}</li>`
+            });
+            topul.innerHTML = addc.join("");
+
+            const clis = document.querySelectorAll("ul.ul1 > cli");
+            for (var i = 0; i < clis.length; i++) {
+                clis[i].addEventListener("click", () => {
+                    ctid = clis[i].value;
+                    reload();
+                });
+            }
+        })
+
+        btn.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            kwd = search.value;
+            reload();
+        })
+
+        const reload = (async () => {
+            loadinit();
+            const response = await fetch(`@Url.Content("~/api/hw1")`, {
+
+            });
+            const datas = await response.json();
+
+            const addcards = await datas.map(x => {
+                const title = x.spotTitle ? x.spotTitle : "Empty";
+                const desc = x.spotDescription ? x.spotDescription.substring(0, 50) : "Empty";
+                const img = x.spotImage ? x.spotImage : "";
+                const trf = x.Address ? Address : "";
+
+                return `
+                                        <div class="card">
+                                                <div class="card" style="border:none">
+                                                <img src="${img}" class="card-img-top" alt="...?"style="border:none" style="width:120px;height:100px"/>
+                                                <div class="card-body"></div>
+                                                <h3 class="card-title">
+                                                    <b>${title}</b>
+                                                </h3>
+                                                <p class="card-text">
+                                                    ${desc}...
+                                                </p>
+                                                <p class="card-text">
+                                                    <small class="text-body-secondary">
+                                                        ${trf}
+                                                    </small>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        `
+            });
+            bodydiv.innerHTML = addcards.join("");
+
+            let addpages = "";
+            const maxpage = datas.totalPages;
+            if (maxpage < 8) {
+                for (let i = 1; i < maxpage; i++) {
+                    addpages += `<li class="page-item" value=${i} id="pgli"><a class="page-link">${i}</a></li>`;
+                }
+            }
+            else {
+                for (let i = 1; i < 4; i++) {
+                    addpages += `<li class="page-item" value=${i}" id="pgli"><a class="page-link">${i}</a></li>`;
+                }
+                addpages += `<li class="page-item">...</li>`;
+                addpages += `<li class="page-item" value=${maxpage}" id="pgli"><a class="page-link">${maxpage}</a></li>`;
+            }
+            pageul.innerHTML = addpages.join("");
+
+            const pglis = document.querySelectorAll("ul.ul2 > pgli");
+            for (var i = 0; i < pglis.length; i++) {
+                pglis[i].addEventListener("click", () => {
+                    pg = pglis[i].value;
+                    reload();
+                });
+            }
+        })();
+
+    </script>
+}

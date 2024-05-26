@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Homework1";
+}
+
+<h1>Homework1</h1>
+<div class="row row-cols-1 row-cols-md-6" id="div1" ></div>
+
+@section Styles{
+    <style>
+    </style>
+}
+
+@section Scripts{
+    <script>
+        const d1 = document.querySelector("#div1");
+
+        const t1 = (async () => {
+            const response = await fetch(`@Url.Content("~/api/hw1")`);
+            const datas = await response.json();
+
+            const addcards = await datas.map(x => {
+                const title = x.spotTitle ? x.spotTitle : "Empty";
+                const desc = x.spotDescription ? x.spotDescription.substring(0, 50) : "Empty";
+                const img = x.spotImage ? x.spotImage : "";
+                const trf = x.Address ? Address : "";
+
+                return `
+                        <div class="card">
+                                <div class="card" style="border:none">
+                                <img src="${img}" class="card-img-top" alt="...?"style="border:none" style="width:120px;height:100px"/>
+                                <div class="card-body"></div>
+                                <h3 class="card-title">
+                                    <b>${title}</b>
+                                </h3>
+                                <p class="card-text">
+                                    ${desc}...
+                                </p>
+                                <p class="card-text">
+                                    <small class="text-body-secondary">
+                                        ${trf}
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                        `
+            });
+            d1.innerHTML = addcards.join("");
+        })();
+        
+    </script>
+}
